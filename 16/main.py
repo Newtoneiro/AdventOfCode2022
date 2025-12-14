@@ -18,22 +18,25 @@ def main():
       paths = [path.strip(',') for path in parts[9:]]
       all_paths[valve] = paths
       flows[valve] = flow
-  
-  return dfs('AA')
+
+    return dfs('AA')
+
 
 @functools.lru_cache(maxsize=None)
-def dfs(cur, opened = (), min_left=30):
-  if min_left <= 0:
-    return 0
-  best = 0
-  if cur not in opened:
-    val = (min_left - 1) * flows[cur]
-    cur_opened = tuple(sorted(opened + (cur,)))
+def dfs(cur, opened=frozenset(), min_left=30):
+    if min_left <= 0:
+        return 0
+
+    best = 0
+
+    if flows[cur] > 0 and cur not in opened:
+        new_opened = opened | {cur}
+        best = max(best, (min_left - 1) * flows[cur] + dfs(cur, new_opened, min_left - 1))
+
     for adj in all_paths[cur]:
-      if val != 0:
-        best = max(best, val + dfs(adj, cur_opened, min_left - 2))
-      best = max(best, dfs(adj, opened, min_left - 1))
-  return best
+        best = max(best, dfs(adj, opened, min_left - 1))
+
+    return best
 
 if __name__ == "__main__":
   print(main())
